@@ -5,21 +5,13 @@ import shlex
 from subprocess import Popen, PIPE
 import pytz
 import requests
+import jwt
+
 
 from esia_connector.exceptions import IncorrectJsonError, HttpError
 
 
 def make_request(url, method='GET', headers=None, data=None):
-    """
-    Makes request to given url and returns parsed response JSON
-    :type url: str
-    :type method: str
-    :type headers: dict or None
-    :type data: dict or None
-    :rtype: dict
-    :raises HttpError: if requests.HTTPError occurs
-    :raises IncorrectJsonError: if response data cannot be parsed to JSON
-    """
     try:
         response = requests.request(method, url, headers=headers, data=data)
         response.raise_for_status()
@@ -57,3 +49,6 @@ def sign_params(params, certificate_file, private_key_file):
 def get_timestamp():
     return datetime.datetime.now(pytz.utc).strftime('%Y.%m.%d %H:%M:%S %z').strip()
 
+
+def parse_token(token):
+    return jwt.decode(token, verify=False)
