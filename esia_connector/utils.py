@@ -45,6 +45,26 @@ def sign_params(params, certificate_file, private_key_file):
     )
     return params
 
+def sign_params_gost(params, public_cert_file_path, private_key_file_path) :
+    # public_cert_file_path = os.path.join(os.getcwd(), "last", "mdapp_public.cer")
+    # public_cert_file_path = os.path.join(os.getcwd(), "last", "mdapp3.pem")
+    # print(public_cert_file_path)
+    # private_key_file_path = os.path.join(os.getcwd(), "last", "mdapp3.pem")
+    # print(private_key_file_path)
+
+    plaintext = params.get('scope', '') + params.get('timestamp', '') + params.get('client_id', '') + params.get('state', '')
+    # cmd = f"openssl smime  -sign -md md_gost12_256 -signer {public_cert_file_path} -inkey {private_key_file_path} -outform DER"  #-noattr -binary -nodetach
+    cmd = f"openssl smime  -sign -engine gost -binary -outform DER -noattr -signer {public_cert_file_path} -inkey {private_key_file_path}"  #-nodetach
+    #For Esia
+    # /usr/local/gost/bin/openssl smime -sign  -engine gost -binary -outform DER -noattr -signer ./server.crt -inkey ./server.key -in ./message.txt -out ./sign.out    p = Popen(shlex.split(cmd), stdout=PIPE, stdin=PIPE)
+    p = Popen(shlex.split(cmd), stdout=PIPE, stdin=PIPE)
+
+    raw_client_secret = p.communicate(plaintext.encode())[0]
+
+    params.update(
+        client_secret=base64.urlsafe_b64encode(raw_client_secret).decode('utf-8'),
+    )
+    return params
 
 def get_timestamp():
     return datetime.datetime.now(pytz.utc).strftime('%Y.%m.%d %H:%M:%S %z').strip()
