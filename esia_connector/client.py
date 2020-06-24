@@ -6,7 +6,7 @@ from jwt.exceptions import InvalidTokenError
 
 from esia_connector import utils
 from esia_connector.exceptions import IncorrectMarkerError
-from esia_connector.utils import get_timestamp, sign_params, make_request
+from esia_connector.utils import get_timestamp, make_request, sign_params_gost
 
 ESIA_ISSUER_NAME = 'http://esia.gosuslugi.ru/'
 AUTHORIZATION_URL = '/aas/oauth2/ac'
@@ -42,9 +42,9 @@ def get_auth_url(settings, state=None, redirect_uri=None):
         'timestamp': get_timestamp(),
         'access_type': 'online'
     }
-    params = sign_params(params,
-                         certificate_file=settings.get("certificate_file"),
-                         private_key_file=settings.get("private_key_file"))
+    params = sign_params_gost(params,
+                         public_cert_file_path=settings.get("certificate_file"),
+                         private_key_file_path=settings.get("private_key_file"))
 
     params = urlencode(sorted(params.items()))  # sorted needed to make uri deterministic for tests.
 
@@ -52,7 +52,8 @@ def get_auth_url(settings, state=None, redirect_uri=None):
 
 
 def get_user_from_token(token):
-    return token.get('urn:esia:sbj', {}).get('urn:esia:sbj:oid')
+    # return token.get('urn:esia:sbj', {}).get('urn:esia:sbj:oid')
+    return token.get('urn:esia:sbj_id')
 
 
 def complete_authorization(settings, code, state, validate=True, redirect_uri=None):
@@ -67,15 +68,16 @@ def complete_authorization(settings, code, state, validate=True, redirect_uri=No
         'state': state,
     }
 
-    params = sign_params(params,
-                         certificate_file=settings.get("certificate_file"),
-                         private_key_file=settings.get("private_key_file"))
+    params = sign_params_gost(params,
+                         public_cert_file_path=settings.get("certificate_file"),
+                         private_key_file_path=settings.get("private_key_file"))
 
     url = f"{settings.get('esia_url')}{TOKEN_EXCHANGE_URL}"
 
     response_json = make_request(url=url, method='POST', data=params)
 
-    id_token = response_json['id_token']
+    # id_token = response_json['id_token']
+    id_token = response_json['access_token']
 
     if validate:
         payload = validate_token(settings, id_token)
@@ -103,6 +105,9 @@ def validate_token(settings, token):
                           issuer=ESIA_ISSUER_NAME)
     except InvalidTokenError as e:
         raise IncorrectMarkerError(e)
+    except Exception as e:
+        print(e)
+        raise e
 
 
 def get_esia_base_url(esia_url):
