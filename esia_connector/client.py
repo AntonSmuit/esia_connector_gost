@@ -43,8 +43,8 @@ def get_auth_url(settings, state=None, redirect_uri=None):
         'access_type': 'online'
     }
     params = sign_params_gost(params,
-                         public_cert_file_path=settings.get("certificate_file"),
-                         private_key_file_path=settings.get("private_key_file"))
+                              public_cert_file_path=settings.get("certificate_file"),
+                              private_key_file_path=settings.get("private_key_file"))
 
     params = urlencode(sorted(params.items()))  # sorted needed to make uri deterministic for tests.
 
@@ -69,8 +69,8 @@ def complete_authorization(settings, code, state, validate=True, redirect_uri=No
     }
 
     params = sign_params_gost(params,
-                         public_cert_file_path=settings.get("certificate_file"),
-                         private_key_file_path=settings.get("private_key_file"))
+                              public_cert_file_path=settings.get("certificate_file"),
+                              private_key_file_path=settings.get("private_key_file"))
 
     url = f"{settings.get('esia_url')}{TOKEN_EXCHANGE_URL}"
 
@@ -124,7 +124,7 @@ def esia_request(settings, url, token, accept_schema=None):
     else:
         headers["Accept"] = "application/json"
 
-    full_esia_url = get_esia_base_url(settings.get("esia_url"))+url
+    full_esia_url = get_esia_base_url(settings.get("esia_url")) + url
     return make_request(url=full_esia_url, headers=headers)
 
 

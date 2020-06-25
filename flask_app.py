@@ -4,11 +4,9 @@ from flask import Flask, request
 
 from esia_connector import client
 
-# ASSETS_DIR = os.path.dirname(os.path.abspath(__file__))
-
 
 def get_res_file(name):
-    return os.path.join(os.path.dirname(__file__), 'res', name)
+    return os.path.join(os.path.dirname(__file__), 'cert', name)
 
 
 ESIA_SETTINGS = client.create_esia_conn_settings(
@@ -19,8 +17,6 @@ ESIA_SETTINGS = client.create_esia_conn_settings(
     token_check_key=get_res_file('RSA_TESIA.cer'),
     esia_url='https://esia-portal1.test.gosuslugi.ru',
     scope='fullname birthdate snils gender')
-    # scope='fullname')
-
 
 assert os.path.exists(ESIA_SETTINGS.get("certificate_file")), "Please place your certificate in res/test.crt !"
 assert os.path.exists(ESIA_SETTINGS.get("private_key_file")), "Please place your private key in res/test.key!"
@@ -30,10 +26,15 @@ app = Flask(__name__)
 
 
 @app.route("/")
-def hello():
+def index():
+    url = generate_url()
+    return f"Start here: <a href='{url}'>{url}</a>"
+
+@app.route("/generate_url")
+def generate_url():
     url = client.get_auth_url(ESIA_SETTINGS)
     print("url: " + url + "\n")
-    return f"Start here: <a href='{url}'>{url}</a>"
+    return url
 
 
 @app.route("/info")
@@ -50,6 +51,4 @@ def process():
 
 
 if __name__ == "__main__":
-    # context = ('cert.pem', 'key.pem')
-    # app.run(debug=True, ssl_context=context)
     app.run()
