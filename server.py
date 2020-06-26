@@ -37,7 +37,7 @@ def generate_url():
     return url
 
 
-@app.route("/info")
+@app.route("/esia_response")
 def process():
     code = request.args.get('code')
     state = request.args.get('state')

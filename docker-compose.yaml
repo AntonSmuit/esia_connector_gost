@@ -6,7 +6,7 @@ services:
     environment:
       ESIA_PROD_MODE: "false"
       APP_MNEMONIC: "SGMU006301"
-      APP_REDIRECT_URL: "http://localhost:5000/info"
+      APP_REDIRECT_URL: "http://localhost:5000/esia_response"
       APP_PUBLIC_KEY_FILE: "mdapp3.pem"
       APP_PRIVATE_KEY_FILE: "mdapp3.pem"
       APP_SCOPES: "fullname birthdate snils gender"
