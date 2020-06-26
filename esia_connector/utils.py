@@ -1,6 +1,7 @@
 import base64
 import json
 import datetime
+import os
 import shlex
 from subprocess import Popen, PIPE
 import pytz
@@ -42,3 +43,7 @@ def get_timestamp():
 
 def parse_token(token):
     return jwt.decode(token, verify=False)
+
+
+def get_res_file(name):
+    return os.path.join(os.curdir, 'cert', name)

@@ -1,3 +1,4 @@
+import os
 import uuid
 from urllib.parse import urlencode
 
@@ -12,23 +13,28 @@ ESIA_ISSUER_NAME = 'http://esia.gosuslugi.ru/'
 AUTHORIZATION_URL = '/aas/oauth2/ac'
 TOKEN_EXCHANGE_URL = '/aas/oauth2/te'
 
+ESIA_TEST_SETTINGS_BASE = {
+    "token_check_key": utils.get_res_file("RSA_TESIA.cer"),
+    "esia_url": "https://esia-portal1.test.gosuslugi.ru"
+}
 
-def create_esia_conn_settings(mnemonic,
-                              redirect_uri,
-                              certificate_file,
-                              private_key_file,
-                              esia_url,
-                              scope,
-                              token_check_key=None):
-    return {
-        "esia_url": esia_url,
-        "mnemonic": mnemonic,
-        "redirect_uri": redirect_uri,
-        "certificate_file": certificate_file,
-        "private_key_file": private_key_file,
-        "scope": scope,
-        "token_check_key": token_check_key
-    }
+ESIA_PROD_SETTINGS_BASE = {
+    "token_check_key": utils.get_res_file("RSA_PROD.cer"),
+    "esia_url": "https://esia-portal1.gosuslugi.ru"
+}
+
+
+def init_esia_conn_settings():
+    test_mode = os.environ.get("ESIA_PROD_MODE") == "false"
+    esia_settings = ESIA_TEST_SETTINGS_BASE if test_mode else ESIA_PROD_SETTINGS_BASE
+    esia_settings["mnemonic"] = os.environ.get("APP_MNEMONIC")
+    esia_settings["redirect_uri"] = os.environ.get("APP_REDIRECT_URL")
+    esia_settings["certificate_file"] = utils.get_res_file(os.environ.get("APP_PUBLIC_KEY_FILE"))
+    esia_settings["private_key_file"] = utils.get_res_file(os.environ.get("APP_PRIVATE_KEY_FILE"))
+    esia_settings["scope"] = os.environ.get("APP_SCOPES")
+    esia_settings["validate_response"] = os.environ.get("APP_VALIDATE_RESPONSE")
+
+    return esia_settings
 
 
 def get_auth_url(settings, state=None, redirect_uri=None):
@@ -51,7 +57,7 @@ def get_auth_url(settings, state=None, redirect_uri=None):
     return settings.get('esia_url') + AUTHORIZATION_URL + "?" + params
 
 
-def get_user_from_token_params(token_params:dict) -> str:
+def get_user_from_token_params(token_params: dict) -> str:
     # return token.get('urn:esia:sbj', {}).get('urn:esia:sbj:oid')
     return str(token_params.get('urn:esia:sbj_id'))
 

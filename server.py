@@ -1,27 +1,26 @@
 import json
 import os
+import pprint
+
+from dotenv import load_dotenv
+
+print("Loading system enviroment variables from .env if it exist...\n")
+load_dotenv(verbose=True)
 
 from flask import Flask, request
 
 from esia_connector import client
 
+# for item, value in os.environ.items():
+#     print(f"{item}: {value}")
 
-def get_res_file(name):
-    return os.path.join(os.path.dirname(__file__), 'cert', name)
+ESIA_SETTINGS = client.init_esia_conn_settings()
+pprint.pprint(ESIA_SETTINGS)
 
 
-ESIA_SETTINGS = client.create_esia_conn_settings(
-    mnemonic='SGMU006301',
-    redirect_uri='http://localhost:5000/info',
-    certificate_file=get_res_file('mdapp3.pem'),
-    private_key_file=get_res_file('mdapp3.pem'),
-    token_check_key=get_res_file('RSA_TESIA.cer'),
-    esia_url='https://esia-portal1.test.gosuslugi.ru',
-    scope='fullname birthdate snils gender')
-
-assert os.path.exists(ESIA_SETTINGS.get("certificate_file")), "Please place your certificate in res/test.crt !"
-assert os.path.exists(ESIA_SETTINGS.get("private_key_file")), "Please place your private key in res/test.key!"
-assert os.path.exists(ESIA_SETTINGS.get("token_check_key")), "Please place ESIA public key in res/esia_pub.key !"
+assert os.path.exists(ESIA_SETTINGS.get("certificate_file")), "public key not found!"
+assert os.path.exists(ESIA_SETTINGS.get("private_key_file")), "private key not found!"
+assert os.path.exists(ESIA_SETTINGS.get("token_check_key")), "ESIA public key not found!"
 
 app = Flask(__name__)
 
