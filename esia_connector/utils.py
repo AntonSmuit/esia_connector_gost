@@ -25,7 +25,7 @@ def make_request(url, method='GET', headers=None, data=None):
 def sign_params_gost(params, public_cert_file_path, private_key_file_path) :
 
     plaintext = params.get('scope', '') + params.get('timestamp', '') + params.get('client_id', '') + params.get('state', '')
-    cmd = f"openssl smime  -sign -engine gost -binary -outform DER -noattr -signer {public_cert_file_path} -inkey {private_key_file_path}"  #-nodetach
+    cmd = "openssl smime  -sign -engine gost -binary -outform DER -noattr -signer " + public_cert_file_path + " -inkey " + private_key_file_path  #-nodetach
 
     p = Popen(shlex.split(cmd), stdout=PIPE, stdin=PIPE)
 

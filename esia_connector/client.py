@@ -48,12 +48,12 @@ def get_auth_url(settings, state=None, redirect_uri=None):
 
     params = urlencode(sorted(params.items()))  # sorted needed to make uri deterministic for tests.
 
-    return f"{settings.get('esia_url')}{AUTHORIZATION_URL}?{params}"
+    return settings.get('esia_url') + AUTHORIZATION_URL + "?" + params
 
 
-def get_user_from_token(token):
+def get_user_from_token_params(token_params:dict) -> str:
     # return token.get('urn:esia:sbj', {}).get('urn:esia:sbj:oid')
-    return token.get('urn:esia:sbj_id')
+    return str(token_params.get('urn:esia:sbj_id'))
 
 
 def complete_authorization(settings, code, state, validate=True, redirect_uri=None):
@@ -72,7 +72,7 @@ def complete_authorization(settings, code, state, validate=True, redirect_uri=No
                               public_cert_file_path=settings.get("certificate_file"),
                               private_key_file_path=settings.get("private_key_file"))
 
-    url = f"{settings.get('esia_url')}{TOKEN_EXCHANGE_URL}"
+    url = settings.get('esia_url') + TOKEN_EXCHANGE_URL
 
     response_json = make_request(url=url, method='POST', data=params)
 
@@ -86,7 +86,7 @@ def complete_authorization(settings, code, state, validate=True, redirect_uri=No
 
     return {
         "token": response_json['access_token'],
-        "user_id": get_user_from_token(payload)
+        "user_id": get_user_from_token_params(payload)
     }
 
 
@@ -111,16 +111,16 @@ def validate_token(settings, token):
 
 
 def get_esia_base_url(esia_url):
-    return f"{esia_url}/rs"
+    return esia_url + "/rs"
 
 
 def esia_request(settings, url, token, accept_schema=None):
     headers = {
-        "Authorization": f"Bearer {token}"
+        "Authorization": "Bearer " + token
     }
 
     if accept_schema:
-        headers["Accept"] = f"application/json; schema='{accept_schema}'"
+        headers["Accept"] = "application/json; schema='" + accept_schema + "'"
     else:
         headers["Accept"] = "application/json"
 
@@ -128,21 +128,21 @@ def esia_request(settings, url, token, accept_schema=None):
     return make_request(url=full_esia_url, headers=headers)
 
 
-def get_person_main_info(settings, user_id, token, accept_schema=None):
-    url = f"/prns/{user_id}"
+def get_person_main_info(settings: dict, user_id: str, token: str, accept_schema=None):
+    url = "/prns/" + user_id
     return esia_request(settings, url=url, token=token, accept_schema=accept_schema)
 
 
-def get_person_addresses(settings, user_id, token, accept_schema=None):
-    url = f"/prns/{user_id}/addrs?embed=(elements)"
+def get_person_addresses(settings: dict, user_id: str, token: str, accept_schema=None):
+    url = "/prns/" + user_id + "/addrs?embed=(elements)"
     return esia_request(settings, url=url, token=token, accept_schema=accept_schema)
 
 
-def get_person_contacts(settings, user_id, token, accept_schema=None):
-    url = f"/prns/{user_id}/ctts?embed=(elements)"
+def get_person_contacts(settings: dict, user_id: str, token: str, accept_schema=None):
+    url = "/prns/" + user_id + "/ctts?embed=(elements)"
     return esia_request(settings, url=url, token=token, accept_schema=accept_schema)
 
 
-def get_person_documents(settings, user_id, token, accept_schema=None):
-    url = f"/prns/{user_id}/docs?embed=(elements)"
+def get_person_documents(settings: dict, user_id: str, token: str, accept_schema=None):
+    url = "/prns/" + user_id + "/docs?embed=(elements)"
     return esia_request(settings, url=url, token=token, accept_schema=accept_schema)

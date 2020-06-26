@@ -1,3 +1,4 @@
+import json
 import os
 
 from flask import Flask, request
@@ -28,7 +29,7 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     url = generate_url()
-    return f"Start here: <a href='{url}'>{url}</a>"
+    return "Start here: <a href='"+ url + "'>" + url + "</a>"
 
 @app.route("/generate_url")
 def generate_url():
@@ -46,9 +47,11 @@ def process():
     esia_response_data = client.complete_authorization(ESIA_SETTINGS, code, state, validate=False)
     token = esia_response_data.get("token")
     user_id = esia_response_data.get("user_id")
+    print("userId: " + user_id)
     inf = client.get_person_main_info(ESIA_SETTINGS, user_id, token)
-    return f"{inf}"
+    # print("info: " + str(inf))
+    return json.dumps(inf, ensure_ascii=False)
 
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host="0.0.0.0", port=5000, debug=True)
