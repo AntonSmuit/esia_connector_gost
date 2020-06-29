@@ -52,7 +52,7 @@ def process():
     user_id = esia_response_data.get("user_id")
     print("userId: " + user_id)
     inf = client.get_person_main_info(ESIA_SETTINGS, user_id, token)
-    inf["user_id"] = user_id
+    inf["esia_user_id"] = user_id
     # print("info: " + str(inf))
     return json.dumps(inf, ensure_ascii=False)
 
