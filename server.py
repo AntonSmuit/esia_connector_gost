@@ -17,7 +17,6 @@ from esia_connector import client
 ESIA_SETTINGS = client.init_esia_conn_settings()
 pprint.pprint(ESIA_SETTINGS)
 
-
 assert os.path.exists(ESIA_SETTINGS.get("certificate_file")), "public key not found!"
 assert os.path.exists(ESIA_SETTINGS.get("private_key_file")), "private key not found!"
 assert os.path.exists(ESIA_SETTINGS.get("token_check_key")), "ESIA public key not found!"
@@ -28,13 +27,14 @@ app = Flask(__name__)
 @app.route("/")
 def index():
     url = generate_url()
-    return "Start here: <a href='"+ url + "'>" + url + "</a>"
+    return "Start here: <a href='" + url + "'>" + url + "</a>"
+
 
 @app.route("/generate_url")
 def generate_url():
     url = client.get_auth_url(ESIA_SETTINGS)
     print("url: " + url + "\n")
-    return url
+    return json.dumps({"url": url}, ensure_ascii=False)
 
 
 @app.route("/esia_response")
